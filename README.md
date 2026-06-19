@@ -65,7 +65,7 @@ cd /path/to/VoidBSD
 sh scripts/build-installer-iso.sh
 ```
 
-The ISO builder fetches the official FreeBSD `dvd1.iso`, injects a VoidBSD
+The ISO builder fetches the official FreeBSD `bootonly.iso`, injects a VoidBSD
 distribution set, and repacks the media with FreeBSD's architecture-specific
 `mkisoimages.sh`. The resulting ISO boots into the normal FreeBSD installer.
 Before `bsdinstall` starts, VoidBSD Setup asks for region and then shows
@@ -95,14 +95,14 @@ The repo also includes a GitHub Actions workflow at
 
 GitHub CLI is expected either on `PATH` as `gh` or at
 `%LOCALAPPDATA%\VoidBSD\tools\bin\gh.exe`. To authenticate and create/push a
-private GitHub repo:
+public GitHub repo:
 
 ```powershell
 & "$env:LOCALAPPDATA\VoidBSD\tools\bin\gh.exe" auth login
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/setup-github.ps1
 ```
 
-Use `-Visibility public` if you intentionally want the repo public.
+Use `-Visibility private` only if you intentionally want the repo private.
 
 ## Zen Browser
 
@@ -126,8 +126,9 @@ Set `VOIDBSD_REQUIRE_ZEN=yes` to make missing Zen support fail the install.
 - `PKG_ABI=FreeBSD:15:amd64`: package ABI override for cross-release image
   builds. The image builder sets this automatically from `FREEBSD_VERSION`.
 - `IMAGE_SIZE=20G`: raw image size.
-- `SOURCE_ISO=/path/to/FreeBSD-15.1-RELEASE-amd64-dvd1.iso`: reuse an existing
-  FreeBSD DVD ISO for `build-installer-iso.sh`.
+- `ISO_FLAVOR=bootonly`: source ISO flavor for `build-installer-iso.sh`.
+- `SOURCE_ISO=/path/to/FreeBSD-15.1-RELEASE-amd64-bootonly.iso`: reuse an
+  existing FreeBSD ISO for `build-installer-iso.sh`.
 - `VOIDBSD_ALLOW_BOOT_DISK_WIPE=yes`: expert-only override that allows the ISO
   setup to offer mounted/boot media as wipe targets.
 - `VOIDBSD_INSTALL_ZEN=no`: skip the Zen hook entirely.

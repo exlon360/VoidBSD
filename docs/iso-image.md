@@ -8,8 +8,8 @@ Checked on 2026-06-19.
   <https://www.freebsd.org/where/>
 
   FreeBSD documents `disc1`, `dvd1`, `bootonly`, `memstick`, and
-  `mini-memstick`; `dvd1` is the safest base for this project because it carries
-  the traditional distribution sets needed for custom `bsdinstall` payloads.
+  `mini-memstick`; VoidBSD uses `bootonly` for release builds to keep the ISO
+  lean. It fetches FreeBSD base/kernel sets during install.
 
 - FreeBSD release builder:
   <https://man.freebsd.org/cgi/man.cgi?query=release&sektion=7&format=html>
@@ -58,13 +58,13 @@ sh scripts/build-installer-iso.sh
 Output:
 
 ```text
-out/voidbsd-15.1-RELEASE-amd64-dvd1.iso
-out/voidbsd-15.1-RELEASE-amd64-dvd1.iso.sha256
+out/voidbsd-15.1-RELEASE-amd64-bootonly.iso
+out/voidbsd-15.1-RELEASE-amd64-bootonly.iso.sha256
 ```
 
 The script:
 
-1. Downloads or reuses the official FreeBSD `dvd1.iso`.
+1. Downloads or reuses the official FreeBSD `bootonly.iso`.
 2. Extracts it into a work directory.
 3. Installs the VoidBSD setup launcher into the ISO boot environment.
 4. Builds `voidbsd.txz`, a custom distribution set containing this project and
@@ -104,9 +104,10 @@ The `Wipe disk` option is intentionally guarded:
 The expert override `VOIDBSD_ALLOW_BOOT_DISK_WIPE=yes` exists for unusual lab
 media only. Do not use it on a workstation you care about.
 
-The bootstrap needs network access for packages. If the first boot has no
-network, fix networking and reboot; the bootstrap stays enabled until it
-finishes successfully.
+The installer and bootstrap both need network access: the bootonly ISO fetches
+FreeBSD base/kernel sets during install, then first boot fetches desktop
+packages. If first boot has no network, fix networking and reboot; the
+bootstrap stays enabled until it finishes successfully.
 
 ## USB Note
 

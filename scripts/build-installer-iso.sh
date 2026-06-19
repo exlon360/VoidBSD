@@ -97,6 +97,11 @@ create_distribution_set() {
 	manifest="$ISO_ROOT/usr/freebsd-dist/MANIFEST"
 	tmp_manifest="$manifest.tmp"
 
+	if [ ! -f "$manifest" ]; then
+		info "Fetching FreeBSD distribution MANIFEST"
+		fetch -o "$manifest" "$DIST_URL/MANIFEST"
+	fi
+
 	if [ -f "$manifest" ]; then
 		grep -v '^voidbsd.txz	' "$manifest" > "$tmp_manifest" || true
 	else
@@ -114,7 +119,7 @@ fetch_source_iso() {
 		return 0
 	fi
 
-	iso_name="FreeBSD-$FREEBSD_VERSION-$ARCH-dvd1.iso"
+	iso_name="FreeBSD-$FREEBSD_VERSION-$ARCH-$ISO_FLAVOR.iso"
 	iso_path="$WORKDIR/$iso_name"
 	iso_url="${ISO_URL:-https://download.freebsd.org/releases/ISO-IMAGES/$RELEASE_SERIES/$iso_name}"
 
@@ -163,7 +168,16 @@ EOF
 
 build_iso() {
 	mkiso="$SRC_DIR/release/$TARGET/mkisoimages.sh"
-	[ -f "$mkiso" ] || die "missing $mkiso; install or clone FreeBSD src into SRC_DIR"
+	if [ ! -f "$mkiso" ]; then
+		mkiso="$WORKDIR/mkisoimages.sh"
+		src_ref=${FREEBSD_SRC_REF:-"releng/$RELEASE_SERIES"}
+		info "Fetching mkisoimages.sh from freebsd-src $src_ref"
+		if ! fetch -o "$mkiso" "https://raw.githubusercontent.com/freebsd/freebsd-src/$src_ref/release/$TARGET/mkisoimages.sh"; then
+			info "Falling back to freebsd-src main for mkisoimages.sh"
+			fetch -o "$mkiso" "https://raw.githubusercontent.com/freebsd/freebsd-src/main/release/$TARGET/mkisoimages.sh"
+		fi
+		chmod 555 "$mkiso"
+	fi
 
 	if [ -e "$OUTPUT_ISO" ] && [ "${FORCE:-no}" != "yes" ]; then
 		die "output ISO exists; set FORCE=yes to overwrite: $OUTPUT_ISO"
@@ -182,13 +196,15 @@ main() {
 	RELEASE_SERIES=${RELEASE_SERIES:-$(printf '%s\n' "$FREEBSD_VERSION" | sed 's/-.*//')}
 	TARGET=${TARGET:-amd64}
 	ARCH=${ARCH:-amd64}
+	ISO_FLAVOR=${ISO_FLAVOR:-bootonly}
 	SRC_DIR=${SRC_DIR:-/usr/src}
 	OUTDIR=${OUTDIR:-"$PROJECT_ROOT/out"}
 	WORKDIR=${WORKDIR:-"$OUTDIR/iso-work"}
 	ISO_ROOT="$WORKDIR/iso-root"
 	DIST_STAGE="$WORKDIR/voidbsd-dist"
 	VOLUME_LABEL=${VOLUME_LABEL:-$(printf 'VOIDBSD_%s_%s' "$RELEASE_SERIES" "$ARCH" | tr '.-' '__' | tr '[:lower:]' '[:upper:]')}
-	OUTPUT_ISO=${OUTPUT_ISO:-"$OUTDIR/voidbsd-$FREEBSD_VERSION-$ARCH-dvd1.iso"}
+	DIST_URL=${DIST_URL:-"https://download.freebsd.org/releases/$TARGET/$ARCH/$FREEBSD_VERSION"}
+	OUTPUT_ISO=${OUTPUT_ISO:-"$OUTDIR/voidbsd-$FREEBSD_VERSION-$ARCH-$ISO_FLAVOR.iso"}
 
 	[ "$(uname -s)" = "FreeBSD" ] || die "run this ISO builder on FreeBSD"
 

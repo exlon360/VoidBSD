@@ -267,6 +267,12 @@ run_installer() {
 	export BSDINSTALL_CONFIGCURRENT=YES
 	export BSDINSTALL_SKIP_KEYMAP=YES
 	export BSDINSTALL_SKIP_TIME=YES
+	if [ -z "${BSDINSTALL_DISTSITE:-}" ]; then
+		release=$(freebsd-version -u 2>/dev/null | sed 's/-p[0-9][0-9]*$//' || true)
+		[ -n "$release" ] || release="15.1-RELEASE"
+		arch=$(uname -m)
+		export BSDINSTALL_DISTSITE="https://download.freebsd.org/releases/$arch/$arch/$release/"
+	fi
 	write_region_hint
 	if [ -n "${PARTITIONS:-}" ]; then
 		disk_mode="wipe $PARTITIONS"

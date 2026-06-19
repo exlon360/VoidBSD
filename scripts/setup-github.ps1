@@ -1,7 +1,7 @@
 param(
     [string]$RepositoryName = "VoidBSD",
     [ValidateSet("private", "public", "internal")]
-    [string]$Visibility = "private",
+    [string]$Visibility = "public",
     [string]$CommitMessage = "Initial VoidBSD scaffold"
 )
 
@@ -39,4 +39,3 @@ if (-not (git remote get-url origin 2>$null)) {
 }
 
 Write-Host "GitHub remote configured for $RepositoryName and current branch pushed."
-

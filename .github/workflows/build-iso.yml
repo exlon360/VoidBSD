@@ -1,0 +1,54 @@
+name: Build ISO Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create or update"
+        required: true
+        default: "voidbsd-latest"
+
+permissions:
+  contents: write
+
+jobs:
+  build-iso:
+    name: Build VoidBSD ISO
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ISO inside FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.1"
+          usesh: true
+          run: |
+            set -eu
+            pwddir=$(pwd)
+            echo "workspace=$pwddir"
+            FREEBSD_VERSION=15.1-RELEASE ISO_FLAVOR=bootonly FORCE=yes sh scripts/build-installer-iso.sh
+            ls -lh out/*.iso out/*.sha256
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voidbsd-iso
+          path: |
+            out/*.iso
+            out/*.sha256
+          if-no-files-found: error
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "VoidBSD ISO" \
+              --notes "Latest VoidBSD bootonly installer ISO. It fetches FreeBSD base/kernel sets during install, then applies the VoidBSD KDE desktop bootstrap."
+          fi
+          gh release upload "$TAG" out/*.iso out/*.sha256 --clobber
+
