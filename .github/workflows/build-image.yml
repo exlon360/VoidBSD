@@ -33,7 +33,7 @@ jobs:
             OUTDIR="$build_root/out" \
               WORKDIR="$build_root/work" \
               FREEBSD_VERSION=15.1-RELEASE \
-              IMAGE_SIZE=32G \
+              IMAGE_SIZE=24G \
               IGNORE_OSVERSION=yes \
               SKIP_PASSWORD_PROMPT=yes \
               VOIDBSD_IMAGE_USER=voidbsd \
@@ -44,7 +44,7 @@ jobs:
             raw="$build_root/out/voidbsd-15.1-RELEASE-amd64.raw"
             mkdir -p out
             sha256 "$raw" > out/voidbsd-15.1-RELEASE-amd64.raw.sha256
-            xz -T0 -9 -k "$raw"
+            xz -T2 -3 -k "$raw"
             cp "$raw.xz" out/
             sha256 "out/voidbsd-15.1-RELEASE-amd64.raw.xz" > out/voidbsd-15.1-RELEASE-amd64.raw.xz.sha256
             ls -lh out/*.raw.xz out/*.sha256
