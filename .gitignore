@@ -1,7 +1,9 @@
 out/
+dist/
+vm/
 *.raw
 *.img
 *.iso
+*.qcow2
 *.txz
 work/
-
