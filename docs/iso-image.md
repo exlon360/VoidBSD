@@ -66,23 +66,43 @@ The script:
 
 1. Downloads or reuses the official FreeBSD `dvd1.iso`.
 2. Extracts it into a work directory.
-3. Builds `voidbsd.txz`, a custom distribution set containing this project and
+3. Installs the VoidBSD setup launcher into the ISO boot environment.
+4. Builds `voidbsd.txz`, a custom distribution set containing this project and
    a one-shot first-boot bootstrap service.
-4. Adds `voidbsd.txz` to `/usr/freebsd-dist/MANIFEST`.
-5. Rebuilds a bootable BIOS/UEFI ISO using `/usr/src/release/amd64/mkisoimages.sh`.
+5. Adds `voidbsd.txz` to `/usr/freebsd-dist/MANIFEST`.
+6. Rebuilds a bootable BIOS/UEFI ISO using `/usr/src/release/amd64/mkisoimages.sh`.
 
 It does not add `/etc/installerconfig` by default, so it does not perform an
-unattended disk wipe. The FreeBSD installer remains interactive.
+unattended disk wipe. The VoidBSD setup launcher is interactive and then hands
+off to FreeBSD's normal `bsdinstall` flow.
 
 ## Installing From The ISO
 
 1. Boot the ISO in a VM or burn it to DVD.
-2. Run the normal FreeBSD installer.
-3. When distribution sets are shown, leave `voidbsd` selected.
-4. Finish the install and reboot into the new system.
-5. On first boot, `voidbsd_bootstrap` installs KDE Plasma, SDDM, Kitty,
+2. Pick a region in VoidBSD Setup.
+3. Choose `Use disk` for FreeBSD guided/manual partitioning, or `Wipe disk`
+   for a selected full-disk install.
+4. If choosing `Wipe disk`, type the exact confirmation shown on screen.
+5. Continue through the normal FreeBSD installer.
+6. When distribution sets are shown, leave `voidbsd` selected.
+7. Finish the install and reboot into the new system.
+8. On first boot, `voidbsd_bootstrap` installs KDE Plasma, SDDM, Kitty,
    the wallpaper/theme defaults, and the Zen hook or Firefox fallback.
-6. The bootstrap disables itself after a successful run and schedules a reboot.
+9. The bootstrap disables itself after a successful run and schedules a reboot.
+
+## Wipe Safety
+
+The `Wipe disk` option is intentionally guarded:
+
+- It only lists disk devices reported by `kern.disks`.
+- It filters out optical, memory disk, and floppy-style devices.
+- It excludes mounted disk parents, including common installer-media labels
+  resolved through `glabel status`.
+- It requires typing `WIPE <disk>` before setting `PARTITIONS=<disk>` for
+  `bsdinstall`.
+
+The expert override `VOIDBSD_ALLOW_BOOT_DISK_WIPE=yes` exists for unusual lab
+media only. Do not use it on a workstation you care about.
 
 The bootstrap needs network access for packages. If the first boot has no
 network, fix networking and reboot; the bootstrap stays enabled until it

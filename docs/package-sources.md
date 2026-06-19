@@ -23,3 +23,6 @@ Checked on 2026-06-19:
   <https://github.com/fastfetch-cli/fastfetch>
 - The FreeBSD GitHub Actions workflow uses `vmactions/freebsd-vm@v1`:
   <https://github.com/vmactions/freebsd-vm>
+- FreeBSD release media starts the installer from `release/rc.local`, which
+  VoidBSD wraps so its setup screen appears before `bsdinstall`:
+  <https://raw.githubusercontent.com/freebsd/freebsd-src/main/release/rc.local>

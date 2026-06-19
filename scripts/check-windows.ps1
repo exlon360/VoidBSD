@@ -24,8 +24,10 @@ scripts/install-voidbsd.sh
 scripts/install-zen.sh
 scripts/build-raw-image.sh
 scripts/build-installer-iso.sh
+scripts/voidbsd-installer-setup.sh
 scripts/configure-user.sh
 overlay/usr/local/libexec/voidbsd/first-login.sh
+overlay/usr/local/libexec/voidbsd/terminal-login.sh
 overlay/usr/local/etc/rc.d/voidbsd_gpu_detect
 "
 for file in $files; do
@@ -39,4 +41,3 @@ echo shell-syntax-ok
 $fastfetchConfig = Join-Path $repoRoot "overlay/usr/local/etc/xdg/fastfetch/config.jsonc"
 Get-Content -Raw $fastfetchConfig | ConvertFrom-Json | Out-Null
 Write-Host "fastfetch-config-json-ok"
-

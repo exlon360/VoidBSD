@@ -133,6 +133,34 @@ extract_iso() {
 	tar -xpf "$SOURCE_ISO_PATH" -C "$ISO_ROOT"
 }
 
+install_setup_launcher() {
+	info "Installing VoidBSD setup launcher into ISO"
+	mkdir -p "$ISO_ROOT/usr/local/libexec/voidbsd"
+	cp "$PROJECT_ROOT/scripts/voidbsd-installer-setup.sh" "$ISO_ROOT/usr/local/libexec/voidbsd/installer-setup.sh"
+	chmod 555 "$ISO_ROOT/usr/local/libexec/voidbsd/installer-setup.sh"
+
+	if [ -f "$ISO_ROOT/etc/rc.local" ] && [ ! -f "$ISO_ROOT/etc/rc.local.freebsd" ]; then
+		cp "$ISO_ROOT/etc/rc.local" "$ISO_ROOT/etc/rc.local.freebsd"
+	fi
+
+	cat > "$ISO_ROOT/etc/rc.local" <<'EOF'
+#!/bin/sh
+
+mkdir -p /tmp/bsdinstall_etc
+
+if [ -x /usr/local/libexec/voidbsd/installer-setup.sh ]; then
+	exec /usr/local/libexec/voidbsd/installer-setup.sh
+fi
+
+if [ -x /etc/rc.local.freebsd ]; then
+	exec /etc/rc.local.freebsd
+fi
+
+exec /usr/libexec/bsdinstall/startbsdinstall primary
+EOF
+	chmod 555 "$ISO_ROOT/etc/rc.local"
+}
+
 build_iso() {
 	mkiso="$SRC_DIR/release/$TARGET/mkisoimages.sh"
 	[ -f "$mkiso" ] || die "missing $mkiso; install or clone FreeBSD src into SRC_DIR"
@@ -172,6 +200,7 @@ main() {
 
 	SOURCE_ISO_PATH=$(fetch_source_iso)
 	extract_iso
+	install_setup_launcher
 
 	rm -rf "$DIST_STAGE"
 	mkdir -p "$DIST_STAGE"

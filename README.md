@@ -68,8 +68,12 @@ sh scripts/build-installer-iso.sh
 The ISO builder fetches the official FreeBSD `dvd1.iso`, injects a VoidBSD
 distribution set, and repacks the media with FreeBSD's architecture-specific
 `mkisoimages.sh`. The resulting ISO boots into the normal FreeBSD installer.
-During install, leave the `voidbsd` distribution selected; on first boot it
-runs the VoidBSD desktop bootstrap and disables itself after success.
+Before `bsdinstall` starts, VoidBSD Setup asks for region and then shows
+`Use disk` or `Wipe disk`. The wipe path excludes mounted installer/current
+system disks where FreeBSD exposes that mapping and requires typing
+`WIPE <disk>` before it proceeds. During install, leave the `voidbsd`
+distribution selected; on first boot it runs the VoidBSD desktop bootstrap and
+disables itself after success.
 
 See [docs/iso-image.md](docs/iso-image.md) for the resource map and install
 notes.
@@ -124,6 +128,8 @@ Set `VOIDBSD_REQUIRE_ZEN=yes` to make missing Zen support fail the install.
 - `IMAGE_SIZE=20G`: raw image size.
 - `SOURCE_ISO=/path/to/FreeBSD-15.1-RELEASE-amd64-dvd1.iso`: reuse an existing
   FreeBSD DVD ISO for `build-installer-iso.sh`.
+- `VOIDBSD_ALLOW_BOOT_DISK_WIPE=yes`: expert-only override that allows the ISO
+  setup to offer mounted/boot media as wipe targets.
 - `VOIDBSD_INSTALL_ZEN=no`: skip the Zen hook entirely.
 - `VOIDBSD_REQUIRE_ZEN=yes`: fail if Zen cannot be installed natively.
 

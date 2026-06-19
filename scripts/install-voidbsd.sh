@@ -50,7 +50,8 @@ copy_overlay() {
 
 	for path in \
 		/usr/local/etc/rc.d/voidbsd_gpu_detect \
-		/usr/local/libexec/voidbsd/first-login.sh
+		/usr/local/libexec/voidbsd/first-login.sh \
+		/usr/local/libexec/voidbsd/terminal-login.sh
 	do
 		if [ -f "$ROOTDIR$path" ]; then
 			chmod 555 "$ROOTDIR$path"
