@@ -166,17 +166,32 @@ EOF
 	chmod 555 "$ISO_ROOT/etc/rc.local"
 }
 
+fetch_release_tooling() {
+	tool_root="$WORKDIR/release"
+	src_ref=${FREEBSD_SRC_REF:-"releng/$RELEASE_SERIES"}
+
+	mkdir -p "$tool_root/$TARGET" "$tool_root/scripts"
+
+	fetch_from_ref() {
+		ref=$1
+		fetch -o "$tool_root/$TARGET/mkisoimages.sh" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/$TARGET/mkisoimages.sh"
+		fetch -o "$tool_root/scripts/tools.subr" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/scripts/tools.subr"
+	}
+
+	info "Fetching FreeBSD release tooling from freebsd-src $src_ref"
+	if ! fetch_from_ref "$src_ref"; then
+		info "Falling back to freebsd-src main for release tooling"
+		fetch_from_ref main
+	fi
+
+	chmod 555 "$tool_root/$TARGET/mkisoimages.sh"
+	printf '%s\n' "$tool_root/$TARGET/mkisoimages.sh"
+}
+
 build_iso() {
 	mkiso="$SRC_DIR/release/$TARGET/mkisoimages.sh"
 	if [ ! -f "$mkiso" ]; then
-		mkiso="$WORKDIR/mkisoimages.sh"
-		src_ref=${FREEBSD_SRC_REF:-"releng/$RELEASE_SERIES"}
-		info "Fetching mkisoimages.sh from freebsd-src $src_ref"
-		if ! fetch -o "$mkiso" "https://raw.githubusercontent.com/freebsd/freebsd-src/$src_ref/release/$TARGET/mkisoimages.sh"; then
-			info "Falling back to freebsd-src main for mkisoimages.sh"
-			fetch -o "$mkiso" "https://raw.githubusercontent.com/freebsd/freebsd-src/main/release/$TARGET/mkisoimages.sh"
-		fi
-		chmod 555 "$mkiso"
+		mkiso=$(fetch_release_tooling)
 	fi
 
 	if [ -e "$OUTPUT_ISO" ] && [ "${FORCE:-no}" != "yes" ]; then
