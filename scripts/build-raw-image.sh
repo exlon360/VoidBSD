@@ -216,7 +216,7 @@ main() {
 	write_boot_config
 
 	cp /etc/resolv.conf "$MNT/etc/resolv.conf"
-	ROOTDIR="$MNT" PKG_ABI="$PKG_ABI" sh "$PROJECT_ROOT/scripts/install-voidbsd.sh"
+	ROOTDIR="$MNT" PKG_ABI="$PKG_ABI" IGNORE_OSVERSION="${IGNORE_OSVERSION:-}" sh "$PROJECT_ROOT/scripts/install-voidbsd.sh"
 	configure_image_user
 	prompt_for_root_password
 	install_legacy_bootcode

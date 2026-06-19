@@ -34,6 +34,7 @@ jobs:
               WORKDIR="$build_root/work" \
               FREEBSD_VERSION=15.1-RELEASE \
               IMAGE_SIZE=24G \
+              IGNORE_OSVERSION=yes \
               SKIP_PASSWORD_PROMPT=yes \
               VOIDBSD_IMAGE_USER=voidbsd \
               VOIDBSD_IMAGE_PASSWORD=voidbsd \
