@@ -42,6 +42,12 @@ cleanup() {
 	fi
 }
 
+unmount_image_filesystems() {
+	mount | grep -q " on $MNT/boot/efi " && umount "$MNT/boot/efi"
+	mount | grep -q " on $MNT/dev " && umount "$MNT/dev"
+	mount | grep -q " on $MNT " && umount "$MNT"
+}
+
 write_boot_config() {
 	cat > "$MNT/etc/fstab" <<'EOF'
 # Device                  Mountpoint  FStype   Options  Dump  Pass#
@@ -69,6 +75,15 @@ install_efi_loader() {
 
 	mkdir -p "$MNT/boot/efi/efi/boot"
 	cp "$MNT/boot/loader.efi" "$MNT/boot/efi/efi/boot/$efi_name"
+}
+
+install_legacy_bootcode() {
+	info "Installing BIOS bootcode"
+	cp "$MNT/boot/pmbr" "$WORKDIR/pmbr"
+	cp "$MNT/boot/gptboot" "$WORKDIR/gptboot"
+	sync
+	unmount_image_filesystems
+	gpart bootcode -b "$WORKDIR/pmbr" -p "$WORKDIR/gptboot" -i 2 "$MD"
 }
 
 prompt_for_root_password() {
@@ -198,13 +213,13 @@ main() {
 	mount -t devfs devfs "$MNT/dev"
 
 	install_efi_loader
-	gpart bootcode -b "$MNT/boot/pmbr" -p "$MNT/boot/gptboot" -i 2 "$MD"
 	write_boot_config
 
 	cp /etc/resolv.conf "$MNT/etc/resolv.conf"
 	ROOTDIR="$MNT" PKG_ABI="$PKG_ABI" sh "$PROJECT_ROOT/scripts/install-voidbsd.sh"
 	configure_image_user
 	prompt_for_root_password
+	install_legacy_bootcode
 
 	info "Image build complete: $IMAGE"
 }
