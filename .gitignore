@@ -1,0 +1,7 @@
+out/
+*.raw
+*.img
+*.iso
+*.txz
+work/
+

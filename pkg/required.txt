@@ -1,0 +1,7 @@
+# Required packages for the desktop experience.
+kde
+sddm
+xorg
+kitty
+fastfetch
+firefox

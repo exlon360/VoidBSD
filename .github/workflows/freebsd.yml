@@ -1,0 +1,31 @@
+name: FreeBSD Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  freebsd:
+    name: FreeBSD 15.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell and Fastfetch checks
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.1"
+          usesh: true
+          prepare: |
+            pkg update -f
+            pkg install -y fastfetch
+          run: |
+            set -eu
+            make check
+            install -d /usr/local/etc/xdg/fastfetch /usr/local/share/voidbsd/fastfetch
+            cp overlay/usr/local/etc/xdg/fastfetch/config.jsonc /usr/local/etc/xdg/fastfetch/config.jsonc
+            cp overlay/usr/local/share/voidbsd/fastfetch/logo.txt /usr/local/share/voidbsd/fastfetch/logo.txt
+            fastfetch --config /usr/local/etc/xdg/fastfetch/config.jsonc --show-errors
+            test -f /usr/src/release/amd64/mkisoimages.sh || echo "FreeBSD source tree not present; ISO repack script check skipped."
+

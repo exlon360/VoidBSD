@@ -1,0 +1,10 @@
+{
+  "KPackageStructure": "Plasma/Wallpaper",
+  "KPlugin": {
+    "Id": "voidbsd-night",
+    "Name": "VoidBSD Night",
+    "Description": "A dark neon Tokyo Night desktop wallpaper for VoidBSD.",
+    "Icon": "preferences-desktop-wallpaper"
+  }
+}
+

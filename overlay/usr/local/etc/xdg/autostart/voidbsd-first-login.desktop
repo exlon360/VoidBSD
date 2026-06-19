@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=VoidBSD First Login
+Exec=/usr/local/libexec/voidbsd/first-login.sh
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-after=panel
+

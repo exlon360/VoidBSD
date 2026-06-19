@@ -1,0 +1,92 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/local/share/voidbsd/fastfetch/logo.txt",
+    "padding": {
+      "top": 1,
+      "right": 3
+    },
+    "color": {
+      "1": "green",
+      "2": "light_green",
+      "3": "cyan",
+      "4": "blue",
+      "5": "magenta",
+      "6": "light_magenta",
+      "7": "white"
+    }
+  },
+  "display": {
+    "separator": "  ",
+    "color": {
+      "keys": "green",
+      "title": "light_green"
+    },
+    "key": {
+      "width": 10
+    }
+  },
+  "modules": [
+    {
+      "type": "title",
+      "key": "VoidBSD"
+    },
+    "separator",
+    {
+      "type": "os",
+      "key": "OS"
+    },
+    {
+      "type": "host",
+      "key": "Host"
+    },
+    {
+      "type": "kernel",
+      "key": "Kernel"
+    },
+    {
+      "type": "uptime",
+      "key": "Uptime"
+    },
+    {
+      "type": "packages",
+      "key": "Pkgs"
+    },
+    {
+      "type": "shell",
+      "key": "Shell"
+    },
+    {
+      "type": "de",
+      "key": "Desktop"
+    },
+    {
+      "type": "terminal",
+      "key": "Terminal"
+    },
+    {
+      "type": "cpu",
+      "key": "CPU"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU"
+    },
+    {
+      "type": "memory",
+      "key": "Memory"
+    },
+    {
+      "type": "disk",
+      "key": "Disk",
+      "folders": "/"
+    },
+    "break",
+    {
+      "type": "colors",
+      "symbol": "circle"
+    }
+  ]
+}
+

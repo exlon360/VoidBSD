@@ -1,0 +1,22 @@
+# Optional quality-of-life packages. The installer attempts these one by one
+# and keeps going if a package is unavailable for the target ABI.
+plasma6-plasma
+drm-kmod
+noto
+noto-emoji
+nerd-fonts
+git
+curl
+wget
+vim
+neovim
+tmux
+htop
+zip
+unzip
+p7zip
+okular
+spectacle
+gwenview
+vlc
+libreoffice

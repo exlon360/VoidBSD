@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# PROVIDE: voidbsd_gpu_detect
+# REQUIRE: FILESYSTEMS
+# BEFORE: LOGIN
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name=voidbsd_gpu_detect
+rcvar=voidbsd_gpu_detect_enable
+start_cmd=voidbsd_gpu_detect_start
+
+voidbsd_gpu_detect_start() {
+	module=
+	gpu_vendors=$(
+		pciconf -lv 2>/dev/null | awk '
+			/^[^[:space:]]/ {
+				if (class ~ /^0x03/) {
+					print vendor
+				}
+				vendor = ""
+				class = ""
+				for (i = 1; i <= NF; i++) {
+					if ($i ~ /^vendor=/) {
+						split($i, item, "=")
+						vendor = item[2]
+					}
+					if ($i ~ /^class=/) {
+						split($i, item, "=")
+						class = item[2]
+					}
+				}
+				next
+			}
+			END {
+				if (class ~ /^0x03/) {
+					print vendor
+				}
+			}
+		'
+	)
+
+	if printf '%s\n' "$gpu_vendors" | grep -Eiq '^0x8086$'; then
+		module=i915kms
+	elif printf '%s\n' "$gpu_vendors" | grep -Eiq '^0x1002$|^0x1022$'; then
+		module=amdgpu
+	elif printf '%s\n' "$gpu_vendors" | grep -Eiq '^0x10de$'; then
+		echo "VoidBSD: NVIDIA detected; install and configure the matching NVIDIA FreeBSD driver manually." >&2
+	fi
+
+	if [ -n "$module" ]; then
+		current=$(sysrc -n kld_list 2>/dev/null || true)
+		case " $current " in
+			*" $module "*) ;;
+			*) sysrc kld_list="${current:+$current }$module" >/dev/null ;;
+		esac
+		kldload "$module" 2>/dev/null || true
+	fi
+
+	sysrc voidbsd_gpu_detect_enable=NO >/dev/null
+}
+
+load_rc_config "$name"
+: ${voidbsd_gpu_detect_enable:=NO}
+run_rc_command "$1"

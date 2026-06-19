@@ -1,0 +1,6 @@
+[krunner.desktop]
+_launch=Alt+Space\tAlt+F2,Alt+Space\tAlt+F2,KRunner
+
+[org.kde.krunner.desktop]
+_launch=Alt+Space\tAlt+F2,Alt+Space\tAlt+F2,KRunner
+
