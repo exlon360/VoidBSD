@@ -170,12 +170,13 @@ fetch_release_tooling() {
 	tool_root="$WORKDIR/release"
 	src_ref=${FREEBSD_SRC_REF:-"releng/$RELEASE_SERIES"}
 
-	mkdir -p "$tool_root/$TARGET" "$tool_root/scripts"
+	mkdir -p "$tool_root/$TARGET" "$tool_root/scripts" "$WORKDIR/tools/boot"
 
 	fetch_from_ref() {
 		ref=$1
-		fetch -o "$tool_root/$TARGET/mkisoimages.sh" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/$TARGET/mkisoimages.sh"
-		fetch -o "$tool_root/scripts/tools.subr" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/scripts/tools.subr"
+		fetch -o "$tool_root/$TARGET/mkisoimages.sh" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/$TARGET/mkisoimages.sh" || return 1
+		fetch -o "$tool_root/scripts/tools.subr" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/release/scripts/tools.subr" || return 1
+		fetch -o "$WORKDIR/tools/boot/install-boot.sh" "https://raw.githubusercontent.com/freebsd/freebsd-src/$ref/tools/boot/install-boot.sh" || return 1
 	}
 
 	info "Fetching FreeBSD release tooling from freebsd-src $src_ref"
@@ -185,6 +186,7 @@ fetch_release_tooling() {
 	fi
 
 	chmod 555 "$tool_root/$TARGET/mkisoimages.sh"
+	chmod 555 "$WORKDIR/tools/boot/install-boot.sh"
 	printf '%s\n' "$tool_root/$TARGET/mkisoimages.sh"
 }
 
