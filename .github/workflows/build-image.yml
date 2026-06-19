@@ -1,0 +1,71 @@
+name: Build Preinstalled Image Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create or update"
+        required: true
+        default: "voidbsd-latest"
+
+permissions:
+  contents: write
+
+jobs:
+  build-image:
+    name: Build VoidBSD Preinstalled Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build preinstalled image inside FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.1"
+          mem: 8192
+          usesh: true
+          run: |
+            set -eu
+            build_root=/tmp/voidbsd-image
+            rm -rf "$build_root"
+            mkdir -p "$build_root"
+            OUTDIR="$build_root/out" \
+              WORKDIR="$build_root/work" \
+              FREEBSD_VERSION=15.1-RELEASE \
+              IMAGE_SIZE=24G \
+              SKIP_PASSWORD_PROMPT=yes \
+              VOIDBSD_IMAGE_USER=voidbsd \
+              VOIDBSD_IMAGE_PASSWORD=voidbsd \
+              VOIDBSD_IMAGE_AUTOLOGIN=yes \
+              sh scripts/build-raw-image.sh
+
+            raw="$build_root/out/voidbsd-15.1-RELEASE-amd64.raw"
+            mkdir -p out
+            sha256 "$raw" > out/voidbsd-15.1-RELEASE-amd64.raw.sha256
+            xz -T0 -9 -k "$raw"
+            cp "$raw.xz" out/
+            sha256 "out/voidbsd-15.1-RELEASE-amd64.raw.xz" > out/voidbsd-15.1-RELEASE-amd64.raw.xz.sha256
+            ls -lh out/*.raw.xz out/*.sha256
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voidbsd-preinstalled-image
+          path: |
+            out/*.raw.xz
+            out/*.sha256
+          if-no-files-found: error
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "VoidBSD" \
+              --notes "VoidBSD release artifacts. The preinstalled raw image boots with FreeBSD already installed and the VoidBSD desktop layered on top."
+          fi
+          gh release upload "$TAG" out/*.raw.xz out/*.sha256 --clobber

@@ -21,6 +21,29 @@ The default target is FreeBSD `15.1-RELEASE` on `amd64`, because FreeBSD lists
 - Zen Browser install hook, with Firefox as the practical fallback when no
   native FreeBSD Zen package is available.
 
+## Quick Start In A VM
+
+The primary release artifact is the preinstalled disk image:
+
+```text
+voidbsd-15.1-RELEASE-amd64.raw.xz
+```
+
+It boots with FreeBSD already installed. The generated VM image includes a
+default desktop user:
+
+```text
+user: voidbsd
+pass: voidbsd
+```
+
+On Windows, after downloading the release assets into `dist\voidbsd-latest`,
+boot the preinstalled image with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run-voidbsd-vm.ps1
+```
+
 ## Quick Start On An Installed FreeBSD System
 
 Run this from a fresh FreeBSD install:
@@ -54,8 +77,14 @@ FREEBSD_VERSION=15.1-RELEASE IMAGE_SIZE=24G sh scripts/build-raw-image.sh
 The script prompts for a root password when it has an interactive terminal. For
 fully unattended image builds, set `SKIP_PASSWORD_PROMPT=yes` and configure
 users/passwords through your own image pipeline before shipping the image.
+For the release VM image, the GitHub workflow sets `VOIDBSD_IMAGE_USER=voidbsd`
+and `VOIDBSD_IMAGE_PASSWORD=voidbsd`, then seeds that user and enables SDDM
+auto-login.
 
 ## Build An Installer ISO
+
+This is now the secondary/manual path. It still boots FreeBSD's installer,
+because an ISO is install media, not the preinstalled VoidBSD system.
 
 Run this on a FreeBSD host with `/usr/src` installed:
 

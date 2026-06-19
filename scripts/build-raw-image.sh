@@ -53,6 +53,11 @@ EOF
 autoboot_delay="3"
 vfs.root.mountfrom="ufs:/dev/gpt/voidbsd-root"
 EOF
+
+	cat >> "$MNT/etc/rc.conf" <<'EOF'
+hostname="voidbsd"
+ifconfig_DEFAULT="DHCP"
+EOF
 }
 
 install_efi_loader() {
@@ -78,6 +83,60 @@ prompt_for_root_password() {
 	else
 		warn "no interactive terminal; root password was not set"
 	fi
+}
+
+set_image_password() {
+	user=$1
+	password=$2
+
+	chroot "$MNT" /bin/sh -c 'printf "%s\n" "$1" | pw usermod "$2" -h 0' sh "$password" "$user"
+}
+
+image_user_groups() {
+	groups=wheel,operator
+	for group in video realtime; do
+		if pw -R "$MNT" groupshow "$group" >/dev/null 2>&1; then
+			groups="$groups,$group"
+		fi
+	done
+	printf '%s\n' "$groups"
+}
+
+configure_sddm_autologin() {
+	user=$1
+
+	[ "${VOIDBSD_IMAGE_AUTOLOGIN:-yes}" = "yes" ] || return 0
+
+	mkdir -p "$MNT/usr/local/etc/sddm.conf.d"
+	cat > "$MNT/usr/local/etc/sddm.conf.d/20-voidbsd-autologin.conf" <<EOF
+[Autologin]
+User=$user
+Session=plasma.desktop
+EOF
+}
+
+configure_image_user() {
+	user=${VOIDBSD_IMAGE_USER:-}
+	password=${VOIDBSD_IMAGE_PASSWORD:-}
+
+	[ -n "$user" ] || return 0
+	[ -n "$password" ] || die "VOIDBSD_IMAGE_PASSWORD must be set when VOIDBSD_IMAGE_USER is set"
+
+	if ! pw -R "$MNT" usershow "$user" >/dev/null 2>&1; then
+		info "Creating image user: $user"
+		pw -R "$MNT" useradd "$user" -m -s /bin/sh -G "$(image_user_groups)"
+	fi
+
+	set_image_password "$user" "$password"
+
+	if [ -n "${VOIDBSD_ROOT_PASSWORD:-}" ]; then
+		set_image_password root "$VOIDBSD_ROOT_PASSWORD"
+	else
+		set_image_password root "$password"
+	fi
+
+	ROOTDIR="$MNT" sh "$PROJECT_ROOT/scripts/configure-user.sh" "$user"
+	configure_sddm_autologin "$user"
 }
 
 main() {
@@ -144,6 +203,7 @@ main() {
 
 	cp /etc/resolv.conf "$MNT/etc/resolv.conf"
 	ROOTDIR="$MNT" PKG_ABI="$PKG_ABI" sh "$PROJECT_ROOT/scripts/install-voidbsd.sh"
+	configure_image_user
 	prompt_for_root_password
 
 	info "Image build complete: $IMAGE"
