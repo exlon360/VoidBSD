@@ -78,6 +78,7 @@ install_required_packages() {
 		# Word splitting is intentional: package names come from our manifest.
 		# shellcheck disable=SC2086
 		pkg_cmd install -y $required_packages
+		pkg_cmd clean -ay || true
 	fi
 }
 
@@ -88,6 +89,7 @@ install_optional_packages() {
 			warn "optional package '$package' was not installed"
 		fi
 	done
+	pkg_cmd clean -ay || true
 }
 
 configure_services() {

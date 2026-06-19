@@ -1,22 +1,13 @@
-# Optional quality-of-life packages. The installer attempts these one by one
-# and keeps going if a package is unavailable for the target ABI.
-plasma6-plasma
+# Optional quality-of-life packages. Keep this lean; VoidBSD should not ship
+# a giant app bundle by default.
 drm-kmod
 noto
 noto-emoji
-nerd-fonts
 git
 curl
 wget
 vim
-neovim
 tmux
 htop
 zip
 unzip
-p7zip
-okular
-spectacle
-gwenview
-vlc
-libreoffice

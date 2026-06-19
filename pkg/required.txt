@@ -1,5 +1,5 @@
 # Required packages for the desktop experience.
-kde
+plasma6-plasma
 sddm
 xorg
 kitty

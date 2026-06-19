@@ -71,7 +71,7 @@ The image is written to `out/voidbsd-15.1-RELEASE-amd64.raw` by default. You
 can override the target release and size:
 
 ```sh
-FREEBSD_VERSION=15.1-RELEASE IMAGE_SIZE=24G sh scripts/build-raw-image.sh
+FREEBSD_VERSION=15.1-RELEASE IMAGE_SIZE=32G sh scripts/build-raw-image.sh
 ```
 
 The script prompts for a root password when it has an interactive terminal. For
