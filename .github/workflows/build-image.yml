@@ -48,7 +48,9 @@ jobs:
             xz -T0 -0 -v -k "$raw"
             cp "$raw.xz" out/
             sha256 "out/voidbsd-15.1-RELEASE-amd64.raw.xz" > out/voidbsd-15.1-RELEASE-amd64.raw.xz.sha256
-            ls -lh out/*.raw.xz out/*.sha256
+            split -b 1900m -d -a 2 "out/voidbsd-15.1-RELEASE-amd64.raw.xz" "out/voidbsd-15.1-RELEASE-amd64.raw.xz.part-"
+            sha256 out/voidbsd-15.1-RELEASE-amd64.raw.xz.part-* > out/voidbsd-15.1-RELEASE-amd64.raw.xz.parts.sha256
+            ls -lh out/*.raw.xz out/*.raw.xz.part-* out/*.sha256
             df -h "$build_root" .
 
       - name: Upload image artifact
@@ -71,4 +73,7 @@ jobs:
               --title "VoidBSD" \
               --notes "VoidBSD release artifacts. The preinstalled raw image boots with FreeBSD already installed and the VoidBSD desktop layered on top."
           fi
-          gh release upload "$TAG" out/*.raw.xz out/*.sha256 --clobber
+          gh release edit "$TAG" \
+            --title "VoidBSD" \
+            --notes "VoidBSD release artifacts. The preinstalled raw image boots with FreeBSD already installed and the VoidBSD desktop layered on top. GitHub Releases limit each asset to 2GB, so download every .raw.xz.part-* file and reassemble them in order, or use scripts/run-voidbsd-vm.ps1 to do it automatically."
+          gh release upload "$TAG" out/*.raw.xz.part-* out/*.sha256 --clobber

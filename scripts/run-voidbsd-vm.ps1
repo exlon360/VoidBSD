@@ -41,6 +41,43 @@ function Find-Xz {
     return $null
 }
 
+function Join-ImageXzParts {
+    param([string]$Path)
+
+    if (Test-Path $Path) {
+        return $true
+    }
+
+    $dir = Split-Path $Path -Parent
+    $name = Split-Path $Path -Leaf
+    if (-not (Test-Path $dir)) {
+        return $false
+    }
+
+    $parts = @(Get-ChildItem -LiteralPath $dir -Filter "$name.part-*" | Sort-Object Name)
+    if ($parts.Count -eq 0) {
+        return $false
+    }
+
+    Write-Host "Reassembling image archive from $($parts.Count) release parts"
+    $output = [System.IO.File]::Open($Path, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+    try {
+        foreach ($part in $parts) {
+            Write-Host "Adding $($part.Name)"
+            $input = [System.IO.File]::OpenRead($part.FullName)
+            try {
+                $input.CopyTo($output)
+            } finally {
+                $input.Dispose()
+            }
+        }
+    } finally {
+        $output.Dispose()
+    }
+
+    return $true
+}
+
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 
 if (-not $IsoPath) {
@@ -110,7 +147,11 @@ if ($InstallerIso -and -not (Test-Path $DiskPath)) {
 if (-not $InstallerIso -and -not (Test-Path $DiskPath)) {
     if (-not (Test-Path $ImagePath)) {
         if (-not (Test-Path $ImageXzPath)) {
-            throw "Preinstalled VoidBSD image not found at $ImagePath or $ImageXzPath. Download the image release asset into dist\voidbsd-latest first."
+            [void](Join-ImageXzParts $ImageXzPath)
+        }
+
+        if (-not (Test-Path $ImageXzPath)) {
+            throw "Preinstalled VoidBSD image not found at $ImagePath, $ImageXzPath, or split release parts matching $ImageXzPath.part-*. Download all image release assets into dist\voidbsd-latest first."
         }
 
         $xz = Find-Xz

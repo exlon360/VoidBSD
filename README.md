@@ -26,23 +26,29 @@ The default target is FreeBSD `15.1-RELEASE` on `amd64`, because FreeBSD lists
 The primary release artifact is the preinstalled disk image:
 
 ```text
-voidbsd-15.1-RELEASE-amd64.raw.xz
+voidbsd-15.1-RELEASE-amd64.raw.xz.part-00
+voidbsd-15.1-RELEASE-amd64.raw.xz.part-01
+...
 ```
 
-It boots with FreeBSD already installed. The generated VM image includes a
-default desktop user:
+GitHub Releases limit each asset to less than 2GB, so the compressed image is
+published as numbered parts plus SHA256 files. It boots with FreeBSD already
+installed. The generated VM image includes a default desktop user:
 
 ```text
 user: voidbsd
 pass: voidbsd
 ```
 
-On Windows, after downloading the release assets into `dist\voidbsd-latest`,
-boot the preinstalled image with:
+On Windows, after downloading all `voidbsd-15.1-RELEASE-amd64.raw.xz.part-*`
+release assets into `dist\voidbsd-latest`, boot the preinstalled image with:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run-voidbsd-vm.ps1
 ```
+
+The VM launcher reassembles `voidbsd-15.1-RELEASE-amd64.raw.xz`, extracts the
+raw disk image, converts it to `vm\voidbsd.qcow2`, and boots that disk.
 
 ## Quick Start On An Installed FreeBSD System
 
